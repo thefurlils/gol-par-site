@@ -44,56 +44,60 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 `);
 
+// Prepared Statement'ları Tek Kez Tanımlıyoruz (Bellek sızıntısını ve çökmeyi önler)
+const stmtGetSetting = db.prepare("SELECT value FROM settings WHERE key = ?");
+const stmtSetSetting = db.prepare(`
+  INSERT INTO settings(key, value) VALUES (?, ?)
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value
+`);
+const stmtGetSettings = db.prepare("SELECT key, value FROM settings");
+const stmtGetStatsAll = db.prepare("SELECT * FROM stats ORDER BY sort_order ASC, id ASC");
+const stmtGetStatsActive = db.prepare("SELECT * FROM stats WHERE active = 1 ORDER BY sort_order ASC, id ASC");
+const stmtGetMenuAll = db.prepare("SELECT * FROM menu_items ORDER BY category ASC, sort_order ASC, id ASC");
+const stmtGetMenuActive = db.prepare("SELECT * FROM menu_items WHERE active = 1 ORDER BY category ASC, sort_order ASC, id ASC");
+const stmtRecordVisit = db.prepare("INSERT INTO visits(ip, user_agent) VALUES (?, ?)");
+
+const stmtTotalVisits = db.prepare("SELECT COUNT(*) AS count FROM visits");
+const stmtTodayVisits = db.prepare("SELECT COUNT(*) AS count FROM visits WHERE date(created_at, 'localtime') = date('now', 'localtime')");
+const stmtLast7Visits = db.prepare("SELECT COUNT(*) AS count FROM visits WHERE datetime(created_at) >= datetime('now', '-7 days')");
+const stmtDailyVisits = db.prepare(`
+  SELECT date(created_at, 'localtime') AS day, COUNT(*) AS count
+  FROM visits
+  WHERE datetime(created_at) >= datetime('now', '-14 days')
+  GROUP BY day
+  ORDER BY day ASC
+`);
+
 function getSetting(key, fallback = "") {
-  const row = db.prepare("SELECT value FROM settings WHERE key = ?").get(key);
+  const row = stmtGetSetting.get(key);
   return row ? row.value : fallback;
 }
 
 function setSetting(key, value) {
-  db.prepare(`
-    INSERT INTO settings(key, value) VALUES (?, ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
-  `).run(key, String(value ?? ""));
+  stmtSetSetting.run(key, String(value ?? ""));
 }
 
 function getSettings() {
-  return Object.fromEntries(db.prepare("SELECT key, value FROM settings").all().map(r => [r.key, r.value]));
+  return Object.fromEntries(stmtGetSettings.all().map(r => [r.key, r.value]));
 }
 
 function getStats(activeOnly = false) {
-  return db.prepare(`SELECT * FROM stats ${activeOnly ? "WHERE active = 1" : ""} ORDER BY sort_order ASC, id ASC`).all();
+  return activeOnly ? stmtGetStatsActive.all() : stmtGetStatsAll.all();
 }
 
 function getMenu(activeOnly = false) {
-  return db.prepare(`
-    SELECT * FROM menu_items
-    ${activeOnly ? "WHERE active = 1" : ""}
-    ORDER BY category ASC, sort_order ASC, id ASC
-  `).all();
+  return activeOnly ? stmtGetMenuActive.all() : stmtGetMenuAll.all();
 }
 
 function recordVisit(ip, userAgent) {
-  db.prepare("INSERT INTO visits(ip, user_agent) VALUES (?, ?)").run(ip, userAgent);
+  stmtRecordVisit.run(ip, userAgent);
 }
 
 function visitorStats() {
-  const total = db.prepare("SELECT COUNT(*) AS count FROM visits").get().count;
-  const today = db.prepare(`
-    SELECT COUNT(*) AS count FROM visits
-    WHERE date(created_at, 'localtime') = date('now', 'localtime')
-  `).get().count;
-  const last7 = db.prepare(`
-    SELECT COUNT(*) AS count FROM visits
-    WHERE datetime(created_at) >= datetime('now', '-7 days')
-  `).get().count;
-
-  const daily = db.prepare(`
-    SELECT date(created_at, 'localtime') AS day, COUNT(*) AS count
-    FROM visits
-    WHERE datetime(created_at) >= datetime('now', '-14 days')
-    GROUP BY day
-    ORDER BY day ASC
-  `).all();
+  const total = stmtTotalVisits.get().count;
+  const today = stmtTodayVisits.get().count;
+  const last7 = stmtLast7Visits.get().count;
+  const daily = stmtDailyVisits.all();
 
   return { total, today, last7, daily };
 }
