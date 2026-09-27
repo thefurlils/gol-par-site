@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="admin-brand" href="/admin"><span>G</span><div><b>GOL PARK</b><small>CMS PANEL</small></div></a>
+    <nav>
+      <a href="#dashboard">⌂ <span>Dashboard</span></a>
+      <a href="#settings">✦ <span>Site İçeriği</span></a>
+      <a href="#stats">◈ <span>İstatistikler</span></a>
+      <a href="#menu">☷ <span>Menü & Fiyatlar</span></a>
+      <a href="#security">⌁ <span>Güvenlik</span></a>
+    </nav>
+    <a class="site-link" href="/">↗ Siteyi Gör</a>
+    <form method="post" action="/admin/logout"><button class="logout">Çıkış Yap</button></form>
+  </aside>
+
+  <main class="admin-main">
+    <header class="topbar"><div><span class="kicker">YÖNETİM</span><h1>Hoş geldin, <%= user.username %>.</h1></div><div class="status-dot"><i></i> Sistem aktif</div></header>
+    <% if (saved) { %><div class="alert success">Değişiklikler kaydedildi.</div><% } %>
+
+    <section id="dashboard" class="panel">
+      <div class="panel-title"><div><span class="kicker">GENEL BAKIŞ</span><h2>Site analitiği</h2></div></div>
+      <div class="metric-grid">
+        <div class="metric"><span>Toplam ziyaret</span><strong><%= visitors.total.toLocaleString("tr-TR") %></strong><small>Tüm zamanlar</small></div>
+        <div class="metric"><span>Bugün</span><strong><%= visitors.today.toLocaleString("tr-TR") %></strong><small>Bugünkü ziyaret</small></div>
+        <div class="metric"><span>Son 7 gün</span><strong><%= visitors.last7.toLocaleString("tr-TR") %></strong><small>Son hafta</small></div>
+        <div class="metric"><span>Menü ürünü</span><strong><%= menu.length %></strong><small>Toplam kayıt</small></div>
+      </div>
+      <div class="chart-box"><canvas id="visitsChart"></canvas></div>
+    </section>
+
+    <section id="settings" class="panel">
+      <div class="panel-title"><div><span class="kicker">İÇERİK</span><h2>Site metinleri</h2></div></div>
+      <form class="form-grid" method="post" action="/admin/settings">
+        <label>İşletme adı<input name="business_name" value="<%= settings.business_name %>"></label>
+        <label>Alt başlık<input name="business_subtitle" value="<%= settings.business_subtitle %>"></label>
+        <label class="wide">Hero başlık <small>HTML ile &lt;br&gt; / &lt;span&gt; kullanılabilir.</small><input name="hero_title" value="<%= settings.hero_title %>"></label>
+        <label class="wide">Hero açıklaması<textarea name="hero_text"><%= settings.hero_text %></textarea></label>
+        <label>Telefon<input name="phone" value="<%= settings.phone %>"></label>
+        <label>Konum<input name="location" value="<%= settings.location %>"></label>
+        <label>Instagram kullanıcı adı<input name="instagram" value="<%= settings.instagram %>"></label>
+        <label>Rezervasyon metni<input name="booking_text" value="<%= settings.booking_text %>"></label>
+        <label>Hakkımızda başlığı<input name="about_title" value="<%= settings.about_title %>"></label>
+        <label>Menü başlığı<input name="menu_title" value="<%= settings.menu_title %>"></label>
+        <label class="wide">Hakkımızda metni<textarea name="about_text"><%= settings.about_text %></textarea></label>
+        <label class="wide">Menü açıklaması<textarea name="menu_text"><%= settings.menu_text %></textarea></label>
+        <label class="wide">Footer metni<input name="footer_text" value="<%= settings.footer_text %>"></label>
+        <label>SEO başlığı<input name="seo_title" value="<%= settings.seo_title %>"></label>
+        <label>SEO açıklaması<textarea name="seo_description"><%= settings.seo_description %></textarea></label>
+        <div class="wide"><button class="admin-btn" type="submit">İçerikleri Kaydet →</button></div>
+      </form>
+    </section>
+
+    <section id="stats" class="panel">
+      <div class="panel-title"><div><span class="kicker">ANA SAYFA</span><h2>İstatistik kartları</h2></div></div>
+      <form method="post" action="/admin/stats">
+        <div class="editor-table stats-table">
+          <div class="editor-head"><span>Değer</span><span>Başlık</span><span>İkon</span><span>Aktif</span><span></span></div>
+          <% stats.forEach(stat => { %>
+            <div class="editor-row">
+              <input type="hidden" name="id" value="<%= stat.id %>">
+              <input name="value" value="<%= stat.value %>" aria-label="Değer">
+              <input name="label" value="<%= stat.label %>" aria-label="Başlık">
+              <input name="icon" value="<%= stat.icon %>" aria-label="İkon">
+              <label class="check"><input type="checkbox" name="active" value="1" <%= stat.active ? "checked" : "" %>><i></i></label>
+              <span class="row-id">#<%= stat.id %></span>
+            </div>
+          <% }) %>
+        </div>
+        <button class="admin-btn" type="submit">İstatistikleri Kaydet</button>
+      </form>
+      <form class="inline-add" method="post" action="/admin/stats/add">
+        <input name="value" placeholder="+1K" required><input name="label" placeholder="Yeni başlık" required><input name="icon" placeholder="✦"><button type="submit">+ Kart Ekle</button>
+      </form>
+    </section>
+
+    <section id="menu" class="panel">
+      <div class="panel-title"><div><span class="kicker">PARKTA MOLA</span><h2>Menü & fiyat yönetimi</h2></div></div>
+      <form method="post" action="/admin/menu/save">
+        <div class="editor-table menu-table">
+          <div class="editor-head"><span>Kategori</span><span>Ürün</span><span>Açıklama</span><span>Fiyat</span><span>Aktif</span><span></span></div>
+          <% menu.forEach(item => { %>
+            <div class="editor-row">
+              <input type="hidden" name="id" value="<%= item.id %>">
+              <input name="category" value="<%= item.category %>" aria-label="Kategori">
+              <input name="name" value="<%= item.name %>" aria-label="Ürün">
+              <input name="description" value="<%= item.description %>" aria-label="Açıklama">
+              <input name="price" value="<%= item.price %>" aria-label="Fiyat">
+              <label class="check"><input type="checkbox" name="active" value="1" <%= item.active ? "checked" : "" %>><i></i></label>
+              <button class="danger-mini" formaction="/admin/menu/delete/<%= item.id %>" formmethod="post" onclick="return confirm('Bu ürünü silmek istediğine emin misin?')">×</button>
+            </div>
+          <% }) %>
+        </div>
+        <button class="admin-btn" type="submit">Menü Değişikliklerini Kaydet</button>
+      </form>
+      <form class="inline-add" method="post" action="/admin/menu/add">
+        <input name="category" placeholder="Kategori" required><input name="name" placeholder="Ürün adı" required><input name="description" placeholder="Açıklama"><input name="price" placeholder="120 ₺" required><button type="submit">+ Ürün Ekle</button>
+      </form>
+    </section>
+
+    <section id="security" class="panel">
+      <div class="panel-title"><div><span class="kicker">GÜVENLİK</span><h2>Admin şifresi</h2></div></div>
+      <% if (typeof passwordError !== "undefined" && passwordError) { %><div class="alert error"><%= passwordError %></div><% } %>
+      <form class="form-grid" method="post" action="/admin/password">
+        <label>Mevcut şifre<input type="password" name="currentPassword" required></label>
+        <label>Yeni şifre<input type="password" name="newPassword" minlength="8" required></label>
+        <div class="wide"><button class="admin-btn" type="submit">Şifreyi Güncelle</button></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const daily = <%- JSON.stringify(visitors.daily) %>;
+    const ctx = document.getElementById("visitsChart");
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: daily.map(x => x.day),
+        datasets: [{ label: "Ziyaretçi", data: daily.map(x => x.count), tension: .35, fill: true }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  </script>
+</body>
+</html>
