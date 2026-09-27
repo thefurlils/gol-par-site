@@ -1,0 +1,132 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <meta name="description" content="<%= metaDescription %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <div class="noise"></div>
+  
+  <!-- Separated Liquid Glass Navbar Wrapper -->
+  <div class="nav-wrapper">
+    <header class="nav">
+      <a class="brand" href="/">
+        <span class="brand-mark">G</span>
+        <span><b><%= settings.business_name %></b><small><%= settings.business_subtitle %></small></span>
+      </a>
+      <nav>
+        <a href="#hakkimizda">Hakkımızda</a>
+        <a href="#ozellikler">Deneyim</a>
+        <a href="#menu">Menü</a>
+        <a href="#iletisim">İletişim</a>
+      </nav>
+      <a class="nav-cta" href="tel:<%= settings.phone.replace(/\s/g,'') %>">Rezervasyon <span>↗</span></a>
+      <button class="menu-toggle" aria-label="Menüyü aç">☰</button>
+    </header>
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><i></i> KARACABEY · BURSA</div>
+        <h1><%- settings.hero_title %></h1>
+        <p><%= settings.hero_text %></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="tel:<%= settings.phone.replace(/\s/g,'') %>">Sahaya Rezervasyon <span>→</span></a>
+          <a class="btn btn-ghost" href="#menu">Menüyü Gör</a>
+        </div>
+        <div class="trust-row">
+          <div><strong>★ 4.9</strong><span>Misafir deneyimi</span></div>
+          <div><strong>● Açık</strong><span>Rezervasyon alıyoruz</span></div>
+        </div>
+      </div>
+      <div class="hero-media">
+        <div class="image-frame">
+          <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=1400&q=85" alt="Gol Park halı saha tanıtımı">
+          <div class="floating-card">
+            <span class="pulse"></span>
+            <div><b>Maçını yap.</b><small>Keyfini çıkar.</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-wrap" id="ozellikler">
+      <div class="section-head">
+        <div><span class="kicker">GOL PARK DENEYİMİ</span><h2>Oyunun dışındaki<br><em>detaylar da önemli.</em></h2></div>
+        <p>Kaliteli saha, iyi ışık, rahat alanlar ve maç sonrası mola. Hepsi tek adreste.</p>
+      </div>
+      <div class="stats-grid">
+        <% stats.forEach(stat => { %>
+          <div class="stat-card">
+            <span class="stat-icon"><%= stat.icon %></span>
+            <strong><%= stat.value %></strong>
+            <span><%= stat.label %></span>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <section class="about" id="hakkimizda">
+      <div class="about-image">
+        <img src="https://res.cloudinary.com/s0knelc1/image/upload/f_auto,q_auto/pp1" alt="Gol Park">
+      </div>
+      <div class="about-copy">
+        <span class="kicker">BİZ KİMİZ?</span>
+        <h2><%= settings.about_title %></h2>
+        <p><%= settings.about_text %></p>
+        <div class="feature-list">
+          <div><b>01</b><span>Güçlü ışıklandırma<br><small>Akşam maçları için net görüş.</small></span></div>
+          <div><b>02</b><span>Duş & dinlenme<br><small>Maç sonrası rahat bir alan.</small></span></div>
+          <div><b>03</b><span>Parkta Mola<br><small>Kahve, içecek ve atıştırmalık.</small></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu">
+      <div class="section-head menu-head">
+        <div><span class="kicker">PARKTA MOLA</span><h2><%= settings.menu_title %></h2></div>
+        <p><%= settings.menu_text %></p>
+      </div>
+      <div class="menu-layout">
+        <div class="menu-card">
+          <% Object.entries(groupedMenu).forEach(([category, items]) => { %>
+            <div class="menu-category">
+              <h3><%= category %></h3>
+              <% items.forEach(item => { %>
+                <div class="menu-item">
+                  <div><strong><%= item.name %></strong><small><%= item.description %></small></div>
+                  <span><%= item.price %></span>
+                </div>
+              <% }) %>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="iletisim">
+      <div>
+        <span class="kicker">HAZIR MISIN?</span>
+        <h2><%= settings.booking_text %></h2>
+        <p><%= settings.location %> · <%= settings.phone %></p>
+      </div>
+      <a class="btn btn-primary big" href="tel:<%= settings.phone.replace(/\s/g,'') %>">Hemen Ara <span>↗</span></a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand"><span class="brand-mark">G</span><div><b><%= settings.business_name %></b><small><%= settings.footer_text %></small></div></div>
+    <div><span><%= settings.location %></span><a href="tel:<%= settings.phone.replace(/\s/g,'') %>"><%= settings.phone %></a></div>
+    <div class="social"><a href="https://instagram.com/<%= settings.instagram %>" target="_blank" rel="noopener">Instagram ↗</a><a href="/admin/login">Yönetim</a></div>
+  </footer>
+  <script src="/js/site.js"></script>
+</body>
+</html>
