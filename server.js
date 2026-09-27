@@ -8,6 +8,11 @@ const rateLimit = require("express-rate-limit");
 const db = require("./db/database");
 
 const app = express();
+
+// Render / Heroku gibi reverse proxy arkasında çalışan platformlar için ZORUNLUDUR.
+// express-rate-limit uyarısını ve IP tespit sorunlarını çözer.
+app.set("trust proxy", 1);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Sunucu ${PORT} portunda çalışıyor`);
@@ -42,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Visitor tracking: one visit per session, then a new visit after 30 minutes.
+// Ziyaretçi takibi
 app.use((req, res, next) => {
   const ignored = req.path.startsWith("/admin") || req.path.startsWith("/api") ||
     req.path.includes(".") || req.method !== "GET";
