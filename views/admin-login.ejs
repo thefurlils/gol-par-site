@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="login-page">
+  <div class="login-orb orb-a"></div><div class="login-orb orb-b"></div>
+  <main class="login-card">
+    <div class="admin-logo">G</div>
+    <span class="kicker">GOL PARK CMS</span>
+    <h1>Yönetim paneli</h1>
+    <p>İçerik, menü ve istatistikleri tek yerden yönet.</p>
+    <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+    <form method="post" action="/admin/login">
+      <label>Kullanıcı adı<input name="username" autocomplete="username" required></label>
+      <label>Şifre<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="admin-btn" type="submit">Giriş Yap →</button>
+    </form>
+    <a class="back-link" href="/">← Siteye dön</a>
+  </main>
+</body>
+</html>
